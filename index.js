@@ -30,7 +30,7 @@ const s3 = new S3Client({
 });
 
 // Handle file upload endpoint
-app.post("/uploads", upload.single("brand-avatar"), async (req, res, next) => {
+app.post("/uploads", upload.single("avatar"), async (req, res, next) => {
   try {
     const params = {
       Bucket: bucketName,
