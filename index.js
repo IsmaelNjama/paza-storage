@@ -29,27 +29,51 @@ const s3 = new S3Client({
   region: region,
 });
 
-// Handle file upload endpoint
-app.post("/uploads", upload.single("avatar"), async (req, res, next) => {
+// Helper function to upload file to s3
+const uploadFileToS3 = async (file, folder) => {
+  const params = {
+    Bucket: bucketName,
+    Key: `${folder}/${file.originalname}`,
+    Body: file.buffer,
+    ContentType: file.mimetype,
+  };
+
+  const command = new PutObjectCommand(params);
+
+  await s3.send(command);
+  return `https://${bucketName}.s3.${region}.amazonaws.com/${folder}/${file.originalname}`;
+};
+
+// avatar route
+app.post("/uploads/avatar", upload.single("avatar"), async (req, res, next) => {
   try {
-    const params = {
-      Bucket: bucketName,
-      Key: req.file.originalname,
-      Body: req.file.buffer,
-      ContentType: req.file.mimetype,
-    };
-
-    const command = new PutObjectCommand(params);
-
-    await s3.send(command);
-
-    const avatarUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${req.file.originalname}`;
-
+    const avatarUrl = await uploadFileToS3(req.file, "avatars");
     res.send({ avatarUrl });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Error uploading file");
+    res.status(500).send("Error uploading avatar");
   }
 });
+
+// multiple photos route
+
+app.post(
+  "/uploads/photos",
+  upload.array("photos", 10),
+  async (req, res, next) => {
+    try {
+      const photoUrls = await Promise.all(
+        req.files.map(async (file) => {
+          const photoUrl = await uploadFileToS3(file, "photos");
+          return photoUrl;
+        })
+      );
+      res.send({ photoUrls });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error uploading photos");
+    }
+  }
+);
 
 app.listen(PORT, () => console.log("listening on port... " + PORT));
