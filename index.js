@@ -19,7 +19,23 @@ const secretAccessKey = process.env.SECRET_ACCESS_KEY;
 const region = process.env.BUCKET_REGION;
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "application/pdf",
+    "video/mp4",
+    "application/zip",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type"), false);
+  }
+};
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 const s3 = new S3Client({
   credentials: {
@@ -72,6 +88,26 @@ app.post(
     } catch (error) {
       console.error(error);
       res.status(500).send("Error uploading photos");
+    }
+  }
+);
+
+// Multiple files of different formats
+app.post(
+  "/uploads/attachments",
+  upload.array("attachments", 10),
+  async (req, res, next) => {
+    try {
+      const attachmentUrls = await Promise.all(
+        req.files.map(async (file) => {
+          const attachmentUrl = await uploadFileToS3(file, "attachments");
+          return attachmentUrl;
+        })
+      );
+      res.send({ attachmentUrls });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error uploading attachments");
     }
   }
 );
