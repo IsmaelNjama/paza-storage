@@ -6,6 +6,7 @@ const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3");
 
 const cors = require("cors");
 const multer = require("multer");
+const allowedMimeTypes = require("./mimeTypes/allowedMimeTypes");
 
 const app = express();
 const PORT = process.env.PORT || 2500;
@@ -21,14 +22,6 @@ const region = process.env.BUCKET_REGION;
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const allowedMimeTypes = [
-    "image/jpeg",
-    "image/png",
-    "application/pdf",
-    "video/mp4",
-    "application/zip",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
