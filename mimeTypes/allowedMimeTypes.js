@@ -75,7 +75,6 @@ const allowedMimeTypes = [
   "video/x-ms-asf",
   "video/x-ms-wmv",
   "video/x-msvideo",
-  "text/css",
   "text/jsx",
   "application/jsx",
 ];
