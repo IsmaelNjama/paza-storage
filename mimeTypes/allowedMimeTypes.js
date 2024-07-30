@@ -1,4 +1,3 @@
-// allowedMimeTypes.js
 const allowedMimeTypes = [
   "text/html",
   "text/css",
@@ -21,6 +20,7 @@ const allowedMimeTypes = [
   "image/x-ms-bmp",
   "image/svg+xml",
   "image/webp",
+  "image/avif",
   "application/font-woff",
   "application/java-archive",
   "application/json",
