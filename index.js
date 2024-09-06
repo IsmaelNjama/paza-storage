@@ -64,6 +64,22 @@ app.post("/uploads/avatar", upload.single("avatar"), async (req, res, next) => {
   }
 });
 
+// cover photo route
+
+app.post(
+  "/uploads/coverphoto",
+  upload.single("coverphoto"),
+  async (req, res, next) => {
+    try {
+      const coverPhotoUrl = await uploadFileToS3(req.file, "coverphotos");
+      res.send({ coverPhotoUrl });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error uploading cover photo");
+    }
+  }
+);
+
 // multiple photos route
 
 app.post(
